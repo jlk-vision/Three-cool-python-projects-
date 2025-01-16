@@ -1,0 +1,54 @@
+#import neccasery modules
+from kivy.lang import Builder
+from kivymd.app import MDApp
+from kivymd.uix.textfield import MDTextField
+from kivymd.uix.button import MDRaisedButton
+from twilio.rest import Client
+import requests
+
+class SmsBombApp(MDApp):
+    def build(self):
+        layout = Builder.load_string("""
+BoxLayout:
+    orientation: 'vertical'
+    size: root.width, root.height
+
+    MDTextField:
+        id: phone_number
+        hint_text: "Enter phone number"
+        size_hint: None, None
+        size: "280dp", "40dp"
+        pos_hint: {"center_x": 0.5}
+
+    MDTextField:
+        id: message
+        hint_text: "Enter message"
+        size_hint: None, None
+        size: "280dp", "40dp"
+        pos_hint: {"center_x": 0.5}
+
+    MDRaisedButton:
+        text: "Send SMS"
+        on_release: app.send_sms(phone_number.text, message.text)
+        size_hint: None, None
+        size: "100dp", "50dp"
+        pos_hint: {"center_x": 0.5}
+""")
+        return layout
+
+    def send_sms(self, phone_number, message):
+        # Twilio credentials
+        account_sid = 'your_account_sid_only'
+        auth_token = 'your_auth_token'
+        client = Client(account_sid, auth_token)
+        
+        # Send the SMS
+        client.messages.create(
+            body=message,
+            from_='+your_twilio_number',
+            to=phone_number
+        )
+        print("SMS sent to", phone_number)
+
+if __name__ == "__main__":
+    SmsBombApp().run()
