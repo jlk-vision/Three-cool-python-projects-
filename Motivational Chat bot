@@ -1,0 +1,52 @@
+#import neccesary modules
+from kivy.lang import Builder
+from kivymd.app import MDApp
+from kivymd.uix.textfield import MDTextField
+from kivymd.uix.label import Label
+from kivymd.uix.button import MDRaisedButton
+from transformers import pipeline
+from gtts import gTTS
+import os
+
+class MotivationalChatbotApp(MDApp):
+    def build(self):
+        self.chatbot = pipeline("conversational", model="microsoft/DialoGPT-medium")
+        layout = Builder.load_string("""
+BoxLayout:
+    orientation: 'vertical'
+    size: root.width, root.height
+
+    MDTextField:
+        id: user_input
+        hint_text: "Enter your message"
+        size_hint: None, None
+        size: "280dp", "40dp"
+        pos_hint: {"center_x": 0.5}
+
+    MDRaisedButton:
+        text: "Send"
+        on_release: app.respond_to_user(user_input.text)
+        size_hint: None, None
+        size: "100dp", "50dp"
+        pos_hint: {"center_x": 0.5}
+
+    Label:
+        id: chatbot_response
+        text: "I'm here to motivate you!"
+        size_hint: None, None
+        size: "280dp", "50dp"
+        pos_hint: {"center_x": 0.5}
+""")
+        return layout
+
+    def respond_to_user(self, user_input):
+        response = self.chatbot(user_input)[0]['generated_text']
+        self.root.ids.chatbot_response.text = response
+        
+        # Convert text to speech
+        tts = gTTS(response, lang='en')
+        tts.save("response.mp3")
+        os.system("start response.mp3")
+
+if __name__ == "__main__":
+    MotivationalChatbotApp().run()
